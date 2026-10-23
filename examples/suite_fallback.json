@@ -1,0 +1,22 @@
+{
+  "name": "summarizer-suite",
+  "version": "1-json",
+  "prompt": "skills/summarize_v1.md",
+  "model": {
+    "adapter": "mock",
+    "mock": {
+      "mode": "template",
+      "template": "Summary: {prompt}"
+    }
+  },
+  "cases": [
+    {
+      "name": "json fallback case",
+      "input": {"text": "JSON suites work when PyYAML is unavailable."},
+      "assertions": [
+        {"type": "starts_with", "value": "Summary:"},
+        {"type": "contains", "value": "JSON"}
+      ]
+    }
+  ]
+}

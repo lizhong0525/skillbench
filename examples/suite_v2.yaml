@@ -1,0 +1,33 @@
+name: summarizer-suite
+version: "2"
+prompt: skills/summarize_v2.md
+model:
+  adapter: mock
+  mock:
+    mode: template
+    template: "{prompt}"
+cases:
+  - name: short paragraph
+    input:
+      text: "SkillBench runs prompt regression tests locally."
+    assertions:
+      - type: contains
+        value: "Summary:"
+      - type: contains
+        value: "SkillBench"
+      - type: max_completion_tokens
+        value: 200
+  - name: unicode input
+    input:
+      text: "Résumé du texte en français."
+    assertions:
+      - type: starts_with
+        value: "Summary:"
+      - type: not_contains
+        value: "Error"
+  - name: empty-ish input
+    input:
+      text: "..."
+    assertions:
+      - type: regex
+        value: "^Summary: .+"

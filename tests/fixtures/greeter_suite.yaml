@@ -1,0 +1,15 @@
+name: greeter-suite-yaml
+prompt: greeter.md
+model:
+  adapter: mock
+  mock:
+    mode: echo
+cases:
+  - name: echo case
+    input:
+      name: Dana
+    assertions:
+      - type: contains
+        value: Dana
+      - type: regex
+        value: "greeter|Greet"

@@ -1,0 +1,2 @@
+# Optional: enables YAML suites. Without it, use JSON suites instead.
+PyYAML>=6.0

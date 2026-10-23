@@ -1,0 +1,25 @@
+{
+  "name": "greeter-suite",
+  "prompt": "greeter.md",
+  "model": {
+    "adapter": "mock",
+    "mock": {"mode": "template", "template": "Hello! {prompt}"}
+  },
+  "cases": [
+    {
+      "name": "alice",
+      "input": {"name": "Alice"},
+      "assertions": [
+        {"type": "starts_with", "value": "Hello!"},
+        {"type": "contains", "value": "Alice"}
+      ]
+    },
+    {
+      "name": "bob fails",
+      "input": {"name": "Bob"},
+      "assertions": [
+        {"type": "contains", "value": "Carol"}
+      ]
+    }
+  ]
+}
