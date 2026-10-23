@@ -7,10 +7,11 @@ For prompt/skill authors who need to know **what broke** when they edit a prompt
 ## Quickstart
 
 ```bash
+pip install pyyaml   # only needed for YAML suites; JSON suites are zero-dependency
 python -m skillbench run examples/suite_v1.yaml
 ```
 
-No install, no API key, no network needed: the default `mock` adapter is deterministic and offline. (Or `pip install .` to get a `skillbench` command.)
+No API key, no network needed: the default `mock` adapter is deterministic and offline. (Or `pip install .[yaml]` to get a `skillbench` command with YAML support.) No PyYAML? Try the zero-dependency JSON suite: `python -m skillbench run examples/suite_fallback.json`.
 
 ## Demo walkthrough
 
@@ -51,12 +52,15 @@ Comparing baseline suite 'summarizer-suite' vs current suite 'summarizer-suite'
 Pass rate: 100% -> 0%
 Regressions: 3  Improvements: 0  Output changed (still same status): 0
 
-[regression] short paragraph: pass -> fail
+[regression] empty-ish input: pass -> fail
   baseline < | > current
   * Summary: You are a concise summarizer. Summarize the f~ | Condense the following text. Do not use any prefix.
   < Begin your reply with "Summary:".                       |
     Text:                                                   | Text:
-    SkillBench runs prompt regression tests locally.        | SkillBench runs prompt regression tests locally.
+    ...                                                     | ...
+
+[regression] short paragraph: pass -> fail
+  ...
 ```
 
 `compare` exits 1 when regressions exist, so it gates CI.
