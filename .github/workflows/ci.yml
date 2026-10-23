@@ -5,6 +5,9 @@ on:
     branches: [main]
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -30,5 +33,7 @@ jobs:
       - name: Smoke-test the CLI against fixtures
         run: |
           python -m skillbench run examples/suite_v1.yaml -o /tmp/baseline.json
-          python -m skillbench run examples/suite_v2.yaml -o /tmp/current.json || true
-          python -m skillbench compare /tmp/baseline.json /tmp/current.json || true
+          # suite_v2 fails its assertions by design: require exit code exactly 1
+          python -m skillbench run examples/suite_v2.yaml -o /tmp/current.json && exit 1 || test $? -eq 1
+          # regressions exist, so compare must also exit exactly 1
+          python -m skillbench compare /tmp/baseline.json /tmp/current.json && exit 1 || test $? -eq 1

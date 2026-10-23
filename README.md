@@ -118,7 +118,7 @@ pip install -r requirements.txt pytest
 python -m pytest -q
 ```
 
-57 tests cover suite loading (YAML + JSON), every assertion type, both adapters, the runner, report I/O, comparison/diff logic, and CLI exit codes. The test suite runs fully offline with the mock adapter — no paid API required.
+60 tests cover suite loading (YAML + JSON), every assertion type, both adapters, the runner, report I/O, comparison/diff logic, and CLI exit codes. The test suite runs fully offline with the mock adapter — no paid API required.
 
 ## Known limitations
 

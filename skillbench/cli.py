@@ -3,13 +3,17 @@
 from __future__ import annotations
 
 import argparse
-import json
 import sys
 from typing import List, Optional
 
 from . import __version__
 from .adapters import create_adapter
-from .compare import compare_report_files, format_comparison
+from .compare import (
+    check_suite_match,
+    compare_report_files,
+    compare_reports,
+    format_comparison,
+)
 from .errors import SkillBenchError
 from .runner import load_report, run_suite, write_report
 from .suite import load_suite
@@ -27,9 +31,9 @@ def _build_parser() -> argparse.ArgumentParser:
     run_p.add_argument("suite", help="path to a .yaml/.yml or .json suite file")
     run_p.add_argument(
         "--adapter",
-        choices=["mock", "openai"],
         default=None,
-        help="override the adapter named in the suite (default: suite setting or mock)",
+        help="override the adapter named in the suite; any adapter registered "
+        "in skillbench.adapters is allowed (built-ins: mock, openai)",
     )
     run_p.add_argument(
         "--report", "-o", default=None, help="write the JSON report to this path"
@@ -94,29 +98,14 @@ def _cmd_run(args: argparse.Namespace) -> int:
         print(f"Report written to {args.report}")
 
     if args.baseline:
-        comparison = compare_report_files(args.baseline, _report_path_or_inline(args, report))
+        baseline_report = load_report(args.baseline)
+        check_suite_match(baseline_report, report)
+        comparison = compare_reports(baseline_report, report)
         print()
         print(format_comparison(comparison))
         return 1 if comparison["regressions"] > 0 else _exit_code(report)
 
     return _exit_code(report)
-
-
-def _report_path_or_inline(args: argparse.Namespace, report: dict):
-    if args.report:
-        return args.report
-    # No --report given: keep compare pure in-memory by round-tripping through
-    # the same shape load_report validates.
-    import tempfile
-
-    tmp = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".json", delete=False, encoding="utf-8"
-    )
-    try:
-        json.dump(report, tmp)
-    finally:
-        tmp.close()
-    return tmp.name
 
 
 def _exit_code(report: dict) -> int:

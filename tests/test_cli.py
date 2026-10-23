@@ -68,6 +68,56 @@ class TestCliRun(unittest.TestCase):
         self.assertEqual(code, 2)
         self.assertIn("SKILLBENCH_API_KEY", err)
 
+    def test_run_baseline_without_report_path(self):
+        # --baseline without -o must compare in memory, not via a temp file.
+        with tempfile.TemporaryDirectory() as tmp:
+            baseline = os.path.join(tmp, "baseline.json")
+            suite = os.path.join(FIXTURES, "greeter_suite.json")
+            run_cli(["run", suite, "-o", baseline])
+
+            import glob
+
+            pattern = os.path.join(tempfile.gettempdir(), "*.json")
+            before = set(glob.glob(pattern))
+            code, out, _ = run_cli(["run", suite, "--baseline", baseline])
+            after = set(glob.glob(pattern))
+            self.assertEqual(code, 1)  # failures persist, no regressions
+            self.assertIn("No case-level changes", out)
+            self.assertEqual(before, after)  # no leaked temp report files
+
+    def test_run_unknown_adapter_exit_2(self):
+        code, _, err = run_cli(
+            ["run", os.path.join(FIXTURES, "greeter_suite.json"), "--adapter", "nope"]
+        )
+        self.assertEqual(code, 2)
+        self.assertIn("Unknown adapter 'nope'", err)
+
+    def test_run_custom_registered_adapter(self):
+        # README promises adapters registered in skillbench.adapters._REGISTRY
+        # are selectable via --adapter.
+        from skillbench import adapters
+
+        class DummyAdapter(adapters.ModelAdapter):
+            name = "dummy-grill"
+
+            def complete(self, prompt, messages=None):
+                return adapters.ModelResponse(text="dummy reply")
+
+        adapters._REGISTRY[DummyAdapter.name] = DummyAdapter
+        try:
+            code, out, _ = run_cli(
+                [
+                    "run",
+                    os.path.join(FIXTURES, "greeter_suite.json"),
+                    "--adapter",
+                    DummyAdapter.name,
+                ]
+            )
+        finally:
+            del adapters._REGISTRY[DummyAdapter.name]
+        self.assertIn("(adapter: dummy-grill)", out)
+        self.assertIn(code, (0, 1))  # assertions decide, not the CLI
+
     def test_compare_command(self):
         with tempfile.TemporaryDirectory() as tmp:
             baseline = os.path.join(tmp, "baseline.json")

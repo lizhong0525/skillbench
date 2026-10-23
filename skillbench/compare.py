@@ -194,14 +194,19 @@ def format_comparison(comparison: Dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def compare_report_files(baseline_path: str, current_path: str) -> Dict[str, Any]:
-    from .runner import load_report  # local import to avoid a cycle
-
-    baseline = load_report(baseline_path)
-    current = load_report(current_path)
+def check_suite_match(baseline: Dict[str, Any], current: Dict[str, Any]) -> None:
+    """Refuse to compare reports produced by different suites."""
     if baseline.get("suite") != current.get("suite"):
         raise SkillBenchError(
             f"Suite mismatch: baseline is '{baseline.get('suite')}', "
             f"current is '{current.get('suite')}'"
         )
+
+
+def compare_report_files(baseline_path: str, current_path: str) -> Dict[str, Any]:
+    from .runner import load_report  # local import to avoid a cycle
+
+    baseline = load_report(baseline_path)
+    current = load_report(current_path)
+    check_suite_match(baseline, current)
     return compare_reports(baseline, current)
