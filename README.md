@@ -98,14 +98,14 @@ SkillBench never claims semantic quality from a single score. Assertions check e
 ## Adapters
 
 - **mock** (default): deterministic, offline. Modes: `echo` (return the rendered prompt), `template` (wrap it), `map` (fixed prompt→response table). Token counts are word-count estimates.
-- **openai**: any OpenAI-compatible `/chat/completions` endpoint via env vars — `SKILLBENCH_API_KEY` (or `OPENAI_API_KEY`), `SKILLBENCH_BASE_URL` (or `OPENAI_BASE_URL`, default `https://api.openai.com/v1`), `SKILLBENCH_MODEL` (or suite `model.model`). Usage stats are taken from the API response when present.
+- **openai**: any OpenAI-compatible `/chat/completions` endpoint via env vars — `SKILLBENCH_API_KEY` (or `OPENAI_API_KEY`), `SKILLBENCH_BASE_URL` (or `OPENAI_BASE_URL`, default `https://api.openai.com/v1`), `SKILLBENCH_MODEL` (or suite `model.model`). Usage stats are taken from the API response when present. Note: your prompts and case inputs are sent to whatever endpoint you configure, and reports embed full model outputs — `reports/` is gitignored by default, keep it that way for private data.
 
-Override the suite's adapter with `--adapter mock|openai`. Register your own adapter by adding a `ModelAdapter` subclass to `skillbench/adapters.py:_REGISTRY`.
+Override the suite's adapter with `--adapter <name>` (built-ins: `mock`, `openai`). Register your own adapter by adding a `ModelAdapter` subclass to `skillbench/adapters.py:_REGISTRY`; it then works with `--adapter` too.
 
 ## CLI
 
 ```
-python -m skillbench run <suite.yaml|json> [--adapter mock|openai] [-o report.json] [--baseline report.json]
+python -m skillbench run <suite.yaml|json> [--adapter NAME] [-o report.json] [--baseline report.json]
 python -m skillbench compare <baseline.json> <current.json>
 ```
 
